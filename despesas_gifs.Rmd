@@ -1,0 +1,164 @@
+---
+title: "Despesas 2008-2018"
+author: "tiago"
+date: "1 de novembro de 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Despesas Governo Federal 2008-2017
+
+```{r libraries}
+library(tidyverse)
+library(readxl)
+library(scales)
+library(ggrepel)
+library(ipeaData)
+library(extrafont)
+library(gganimate)
+library(RColorBrewer)
+
+tema <- function(){
+    theme_minimal() +
+    theme(
+      text = element_text(family = "Source Sans Pro", colour = "grey20"),
+      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 12),
+      title = element_text(face = "bold"), # size para o Shiny
+      plot.subtitle = element_text(face = "bold", size = 18, color = "red"),
+      plot.caption = element_text(face = "italic"),
+      panel.grid.major = element_blank(), 
+      panel.grid.minor = element_blank(),
+      legend.text = element_text(size = 12),
+      legend.title = element_text(size = 12),
+      axis.ticks.x = element_line(),
+      axis.title = element_text(size = 11),
+      legend.position = 'bottom')
+  }
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+data <- read_excel("despesasBrasil2008a2017.xlsx", skip = 9)
+```
+
+PIBs do período
+
+```{r}
+pibs <- ipeadata("BM12_PIBAC12")
+pibs <- pibs[MES=="12" & ANO %in% (2008:2017)]$VALVALOR
+
+names(pibs) <- as.character(c(2008:2017))
+
+colnames(data)<- c("Categoria", names(pibs))
+```
+
+Normalizando os valores pelos PIBs de cada ano...
+
+```{r}
+for (i in 2:length(data)) {
+  data[,i] <- data[,i] / (pibs[colnames(data[,i])]*1000000)
+}
+```
+
+Tidying os dados
+
+```{r}
+dados <- data %>%
+  mutate(inicial = `2008`) %>%
+  gather(key = "Ano", value = "Valor", `2008`:`2017`) %>%
+  filter(!(Categoria %in% c("Amortização da Dívida", "Juros"))) %>%
+  mutate(Categoria = factor(Categoria),
+         Categoria = fct_reorder(Categoria, Valor),
+         Ano = as.integer(Ano))
+
+```
+
+As cores. Pego a paleta do `RColorBrewer`, converto para rgb, divido os componentes por um determinado valor (1.2, para não ficar muito escuro.) e gero uma nova paleta, 
+
+```{r}
+paleta <- brewer.pal(length(unique(dados$Categoria)), "Set3")
+
+paleta_rgb <- col2rgb(paleta)
+
+paleta_darker <- NULL
+
+for (i in 1:dim(paleta_rgb)[2] ) {
+  paleta_darker <- c(paleta_darker, 
+                     rgb(paleta_rgb[1,i] %/% 1.2,               
+                         paleta_rgb[2,i] %/% 1.2, 
+                         paleta_rgb[3,i] %/% 1.2, maxColorValue = 255))
+}
+```
+
+Eu gostaria de usar duas escalas de cores diferentes, então vou incorporar as cores que quero na própria tabela de dados. Primeiro criemos a tabela de cores:
+
+```{r}
+tabela_cores <- data.frame(
+  "Categoria" = unique(dados$Categoria),
+  "CoresNormais" = paleta,
+  "CoresEscuras" = paleta_darker
+)
+```
+
+Agora incorporemos as cores aos dados:
+
+```{r}
+dados_com_cores <- dados %>%
+  left_join(tabela_cores)
+```
+
+Agora no plot vou usar o `scale_fill_identity`!
+
+```{r}
+dados_plot = dados_com_cores %>% filter(Ano == "2008")
+dados_plot = dados_com_cores
+plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = Categoria)) +
+  geom_bar(aes(fill = CoresNormais), stat = 'identity') +
+  geom_tile(aes(y = inicial, fill = CoresEscuras, color = CoresEscuras), width = 0.9) +
+  geom_text(aes(y = Valor + 0.005, label = percent(round(Valor, 4))), 
+            position = position_dodge(1),
+            size = 4, family = "Source Sans Pro", vjust = 0) +
+  coord_flip() +
+  scale_y_continuous(labels = percent) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  #scale_color_manual(values = paleta_darker) +
+  #scale_fill_manual(values = paleta) +
+  labs(
+    x = NULL,
+    y = "Percentual do PIB",
+    title = "Despesas do Governo Federal -- 2008 a 2017 (valores iniciais destacados)"
+  ) +
+  #geom_text(aes(label = Ano), x = 1, y = 0.05, size = 5) +
+  tema() +
+  theme(legend.position = 'none')
+
+plot_estatico
+```
+
+Agora o gif!
+
+```{r}
+plot_dinamico <- plot_estatico +
+  labs(subtitle = "{frame_time}") +
+  transition_time(Ano) +
+  ease_aes('linear')
+
+# plot_dinamico
+
+animate(plot_dinamico, nframes = 100, height = 480, width = 800)
+```
+
+Salvando o gif...
+```{r}
+anim_save("despesas.gif", animation = last_animation())
+```
+
+
