@@ -45,7 +45,8 @@ tema <- function(){
 You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
-data <- read_excel("despesasBrasil2008a2017.xlsx", skip = 9)
+# data <- read_excel("despesasBrasil2008a2017.xlsx", skip = 9)
+data <- read_excel("despesasBrasil2008a2017previdencia.xlsx", skip = 9)
 ```
 
 PIBs do período
@@ -79,6 +80,18 @@ dados <- data %>%
          Ano = as.integer(Ano))
 
 ```
+
+Incorporando legendas em inglês.
+
+```{r}
+Category <- c("Personnel and Public Sector Pensions","Healthcare Costs","Education Costs","Welfare Costs","Administrative Costs","Pension Benefits (private sector workers)","Investments","Transfers to States and Municipalities")
+
+traducao <- data.frame(Categoria = unique(dados$Categoria), Category)
+
+dados <- dados %>%
+  left_join(traducao)
+```
+
 
 As cores. Pego a paleta do `RColorBrewer`, converto para rgb, divido os componentes por um determinado valor (1.2, para não ficar muito escuro.) e gero uma nova paleta, 
 
@@ -114,19 +127,29 @@ dados_com_cores <- dados %>%
   left_join(tabela_cores)
 ```
 
+Incluir dados para o início e o final.
+
+```{r}
+
+```
+
+
 Agora no plot vou usar o `scale_fill_identity`!
 
 ```{r}
-dados_plot = dados_com_cores %>% filter(Ano == "2008")
-dados_plot = dados_com_cores
-plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = Categoria)) +
+dados_plot <- dados_com_cores %>% filter(Ano == "2008")
+dados_plot <- dados_com_cores
+
+plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria, Valor))) +
   geom_bar(aes(fill = CoresNormais), stat = 'identity') +
   geom_tile(aes(y = inicial, fill = CoresEscuras, color = CoresEscuras), width = 0.9) +
-  geom_text(aes(y = Valor + 0.005, label = percent(round(Valor, 4))), 
+  geom_text(aes(y = Valor + 0.003, 
+                label = percent(round(Valor, 4)), 
+                color = CoresEscuras), 
             position = position_dodge(1),
             size = 4, family = "Source Sans Pro", vjust = 0) +
   coord_flip() +
-  scale_y_continuous(labels = percent) +
+  scale_y_continuous(labels = percent, expand = c(0, 0), limits = c(0,0.09)) +
   scale_fill_identity() +
   scale_color_identity() +
   #scale_color_manual(values = paleta_darker) +
