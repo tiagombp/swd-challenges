@@ -33,7 +33,8 @@ tema <- function(){
       panel.grid.minor = element_blank(),
       legend.text = element_text(size = 12),
       legend.title = element_text(size = 12),
-      axis.ticks.x = element_line(),
+      axis.ticks = element_line(size = 0.5),
+      axis.ticks.length = unit(.25, "cm"),
       axis.title = element_text(size = 11),
       legend.position = 'bottom')
   }
@@ -85,9 +86,11 @@ dados <- data %>%
 Incorporando legendas em inglês.
 
 ```{r}
-Category <- c("Personnel and Public Sector Pensions","Healthcare Costs","Education Costs","Welfare Costs","Administrative Costs","Pension Benefits (private sector workers)","Investments","Transfers to States and Municipalities")
+Category <- c("Personnel and Public Sector Pensions","Healthcare Costs","Education Costs","Welfare Costs","Administrative Costs","Pension Benefits (private sector)","Investments","Transfers to States and Municipalities")
 
-traducao <- data.frame(Categoria = unique(dados$Categoria), Category)
+Categoria_sem_acento <- c("Pessoal (Ativo, Inativo, Pension.)", "Custeio da Saude", "Custeio da Educacao", "Custeio Social", "Custeio Administrativo", "Beneficios Previdenciarios RGPS", "Investimentos", "Transferencias a Estados e Mun.")
+
+traducao <- data.frame(Categoria = unique(dados$Categoria), Category, Categoria_sem_acento)
 
 dados <- dados %>%
   left_join(traducao)
@@ -169,7 +172,7 @@ plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria, Valor)
   ) +
   #geom_text(aes(label = Ano), x = 1, y = 0.05, size = 5) +
   tema() +
-  theme(legend.position = 'none')
+  theme(legend.position = 'none') + theme(axis.ticks.y = element_blank())
 
 plot_estatico
 ```
@@ -195,14 +198,14 @@ anim_save("despesas.gif", animation = last_animation())
 Gráfico de linhas
 
 ```{r}
-graf_linhas <- ggplot(dados_plot, aes(x = Ano, y = Valor, group = Categoria, color = CoresEscuras)) +
+graf_linhas <- ggplot(dados_plot, aes(x = Ano, y = Valor, group = Categoria_sem_acento, color = CoresEscuras)) +
   geom_line(size = 1) +
   geom_segment(aes(xend = max(dados_plot$Ano), yend = Valor, color = CoresNormais), linetype = 2) +
   geom_point(size = 2) +
   scale_y_continuous(labels = percent) +
   geom_text(aes(x = max(dados_plot$Ano) + 0.1, 
                 label = paste(percent(round(Valor, 4)),
-                              Categoria)), 
+                              Categoria_sem_acento)), 
             hjust = 0) +
   scale_x_continuous(labels = unique(dados_plot$Ano), 
                      breaks = unique(dados_plot$Ano),
@@ -210,7 +213,7 @@ graf_linhas <- ggplot(dados_plot, aes(x = Ano, y = Valor, group = Categoria, col
   scale_color_identity() +
   labs(
     y = "Percentual do PIB",
-    x = "Ano"
+    x = NULL
   ) +
   tema() + 
   theme(legend.position = 'none')
@@ -218,11 +221,52 @@ graf_linhas <- ggplot(dados_plot, aes(x = Ano, y = Valor, group = Categoria, col
 graf_linhas + theme(axis.text = element_text(size = 8))
 ```
 
-Gif
+Gif do gráfico de linhas
+
+(muitíssimo inspirado )
 
 ```{r}
- gif_linhas <- graf_linhas + transition_reveal(Categoria, Ano)
+ gif_linhas <- graf_linhas + transition_reveal(Categoria_sem_acento, Ano)
 
 animate(gif_linhas, nframes = 100, height = 480, width = 800)
+```
+
+Salvando o gif.
+
+```{r}
+anim_save("despesas_linhas.gif", animation = last_animation())
+```
+
+Em inglês...
+```{r}
+plot_english <- ggplot(dados_plot, aes(x = Ano, y = Valor, group = Category, color = CoresEscuras)) +
+  geom_line(size = 1) +
+  geom_segment(aes(xend = max(dados_plot$Ano), yend = Valor, color = CoresNormais), linetype = 2) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = percent) +
+  geom_text(aes(x = max(dados_plot$Ano) + 0.1, 
+                label = paste(percent(round(Valor, 4)),
+                              Category)), 
+            hjust = 0) +
+  scale_x_continuous(labels = unique(dados_plot$Ano), 
+                     breaks = unique(dados_plot$Ano),
+                     limits = c(2008, 2021)) +
+  scale_color_identity() +
+  labs(
+    y = NULL,
+    x = NULL,
+    title = "Expenditure of the Brazilian Federal Government as a percentage of the GDP"
+  ) +
+  tema() + 
+  theme(legend.position = 'none') + theme(title = element_text(size = 16, face = 'plain')) +
+  transition_reveal(Category, Ano) 
+
+animate(plot_english, nframes = 100, height = 480, width = 760)
+
+```
+
+Salvar....
+```{r}
+anim_save("expenditure_Brazil.gif", animation = last_animation())
 ```
 
