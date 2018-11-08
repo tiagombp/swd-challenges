@@ -45,8 +45,8 @@ tema <- function(){
 You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
-# data <- read_excel("despesasBrasil2008a2017.xlsx", skip = 9)
-data <- read_excel("despesasBrasil2008a2017previdencia.xlsx", skip = 9)
+data <- read_excel("despesasBrasil2008a2017.xlsx", skip = 9)
+# data <- read_excel("despesasBrasil2008a2017previdencia.xlsx", skip = 9)
 ```
 
 PIBs do período
@@ -72,7 +72,8 @@ Tidying os dados
 
 ```{r}
 dados <- data %>%
-  mutate(inicial = `2008`) %>%
+  mutate(inicial = `2008`,
+         final = `2017`) %>%
   gather(key = "Ano", value = "Valor", `2008`:`2017`) %>%
   filter(!(Categoria %in% c("Amortização da Dívida", "Juros"))) %>%
   mutate(Categoria = factor(Categoria),
@@ -96,7 +97,9 @@ dados <- dados %>%
 As cores. Pego a paleta do `RColorBrewer`, converto para rgb, divido os componentes por um determinado valor (1.2, para não ficar muito escuro.) e gero uma nova paleta, 
 
 ```{r}
-paleta <- brewer.pal(length(unique(dados$Categoria)), "Set3")
+qde_categorias <- length(unique(dados$Categoria))
+
+paleta <- brewer.pal(qde_categorias, "Set3")
 
 paleta_rgb <- col2rgb(paleta)
 
@@ -104,9 +107,9 @@ paleta_darker <- NULL
 
 for (i in 1:dim(paleta_rgb)[2] ) {
   paleta_darker <- c(paleta_darker, 
-                     rgb(paleta_rgb[1,i] %/% 1.2,               
-                         paleta_rgb[2,i] %/% 1.2, 
-                         paleta_rgb[3,i] %/% 1.2, maxColorValue = 255))
+                     rgb(paleta_rgb[1,i] %/% 1.25,               
+                         paleta_rgb[2,i] %/% 1.25, 
+                         paleta_rgb[3,i] %/% 1.25, maxColorValue = 255))
 }
 ```
 
@@ -127,29 +130,34 @@ dados_com_cores <- dados %>%
   left_join(tabela_cores)
 ```
 
-Incluir dados para o início e o final.
-
-```{r}
-
-```
-
-
 Agora no plot vou usar o `scale_fill_identity`!
 
 ```{r}
-dados_plot <- dados_com_cores %>% filter(Ano == "2008")
+dados_plot <- dados_com_cores %>% filter(Ano == "2015")
 dados_plot <- dados_com_cores
 
 plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria, Valor))) +
   geom_bar(aes(fill = CoresNormais), stat = 'identity') +
-  geom_tile(aes(y = inicial, fill = CoresEscuras, color = CoresEscuras), width = 0.9) +
+  geom_tile(aes(y = inicial, color = CoresEscuras), width = 0.9, height = 0.00001, linetype = 'dotted') +
+  geom_tile(aes(y = final, color = CoresEscuras), width = 0.9, height = 0.00001) +
   geom_text(aes(y = Valor + 0.003, 
                 label = percent(round(Valor, 4)), 
                 color = CoresEscuras), 
             position = position_dodge(1),
             size = 4, family = "Source Sans Pro", vjust = 0) +
+  geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", inicial, NA)), 
+            x = qde_categorias + 0.8, 
+            label = min(dados_plot$Ano),
+            vjust = "top", hjust = "center", color = "grey50",
+            family = "Source Sans Pro", size = 3) +
+  geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", final, NA)), 
+            x = qde_categorias + 0.8, 
+            label = max(dados_plot$Ano),
+            vjust = "center", hjust = "center", color = "grey50", 
+            family = "Source Sans Pro", size = 3) +
   coord_flip() +
   scale_y_continuous(labels = percent, expand = c(0, 0), limits = c(0,0.09)) +
+  scale_x_discrete(expand = c(0, 1.01)) +
   scale_fill_identity() +
   scale_color_identity() +
   #scale_color_manual(values = paleta_darker) +
@@ -184,4 +192,37 @@ Salvando o gif...
 anim_save("despesas.gif", animation = last_animation())
 ```
 
+Gráfico de linhas
+
+```{r}
+graf_linhas <- ggplot(dados_plot, aes(x = Ano, y = Valor, group = Categoria, color = CoresEscuras)) +
+  geom_line(size = 1) +
+  geom_segment(aes(xend = max(dados_plot$Ano), yend = Valor, color = CoresNormais), linetype = 2) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = percent) +
+  geom_text(aes(x = max(dados_plot$Ano) + 0.1, 
+                label = paste(percent(round(Valor, 4)),
+                              Categoria)), 
+            hjust = 0) +
+  scale_x_continuous(labels = unique(dados_plot$Ano), 
+                     breaks = unique(dados_plot$Ano),
+                     limits = c(2008, 2020)) +
+  scale_color_identity() +
+  labs(
+    y = "Percentual do PIB",
+    x = "Ano"
+  ) +
+  tema() + 
+  theme(legend.position = 'none')
+
+graf_linhas + theme(axis.text = element_text(size = 8))
+```
+
+Gif
+
+```{r}
+ gif_linhas <- graf_linhas + transition_reveal(Categoria, Ano)
+
+animate(gif_linhas, nframes = 100, height = 480, width = 800)
+```
 
