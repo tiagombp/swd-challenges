@@ -143,11 +143,11 @@ plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria, Valor)
   geom_bar(aes(fill = CoresNormais), stat = 'identity') +
   geom_tile(aes(y = inicial, color = CoresEscuras), width = 0.9, height = 0.00001, linetype = 'dotted') +
   geom_tile(aes(y = final, color = CoresEscuras), width = 0.9, height = 0.00001) +
-  geom_text(aes(y = Valor + 0.003, 
+  geom_text(aes(y = Valor + 0.005, 
                 label = percent(round(Valor, 4)), 
                 color = CoresEscuras), 
             position = position_dodge(1),
-            size = 4, family = "Source Sans Pro", vjust = 0) +
+            size = 5, family = "Source Sans Pro", vjust = 0) +
   geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", inicial, NA)), 
             x = qde_categorias + 0.8, 
             label = min(dados_plot$Ano),
@@ -156,10 +156,10 @@ plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria, Valor)
   geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", final, NA)), 
             x = qde_categorias + 0.8, 
             label = max(dados_plot$Ano),
-            vjust = "center", hjust = "center", color = "grey50", 
+            vjust = "top", hjust = "center", color = "grey50", 
             family = "Source Sans Pro", size = 3) +
   coord_flip() +
-  scale_y_continuous(labels = percent, expand = c(0, 0), limits = c(0,0.09)) +
+  scale_y_continuous(labels = percent, expand = c(0, 0), limits = c(0,0.095)) +
   scale_x_discrete(expand = c(0, 1.01)) +
   scale_fill_identity() +
   scale_color_identity() +
@@ -168,7 +168,7 @@ plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria, Valor)
   labs(
     x = NULL,
     y = "Percentual do PIB",
-    title = "Despesas do Governo Federal -- 2008 a 2017 (valores iniciais destacados)"
+    title = NULL
   ) +
   #geom_text(aes(label = Ano), x = 1, y = 0.05, size = 5) +
   tema() +
