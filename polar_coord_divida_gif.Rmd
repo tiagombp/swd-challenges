@@ -170,6 +170,31 @@ anim_save("divida_quadratic.gif", animation = last_animation())
 
 
 ```
+### Ideia da Dariya Sydykova
+
+Gerando arquivos de imagem para cada frame.
+
+```{r}
+divida_gif <- animate(plot_din, 
+                      device = "svg",
+                      bg = 'transparent',
+                      width = 688, 
+                      height = 488, 
+                      renderer = file_renderer("./gganim", prefix = "divida_gif", overwrite = TRUE))
+```
+
+
+```{r}
+library(magick)
+
+t1 <- magick::image_read(divida_gif[1])
+
+teste <- magick::image_append(c(divida_gif[1],divida_gif[2]))
+```
+
+### Equalizador
+
+
 
 Legal e tal, mas eu queria que as barras fossem segmentadas por cor, como num equalizador. Vou precisar fragmentar os valores em categorias, e depois fazer uma barra empilhada. Vamos ver no que vai dar.
 

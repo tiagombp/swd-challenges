@@ -187,7 +187,7 @@ plot_dinamico <- plot_estatico +
 
 # plot_dinamico
 
-animate(plot_dinamico, nframes = 100, height = 480, width = 800)
+animate(plot_dinamico, bg = 'transparent', nframes = 120, height = 488, width = 688)
 ```
 
 Salvando o gif...
