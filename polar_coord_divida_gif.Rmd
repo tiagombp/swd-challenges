@@ -30,7 +30,7 @@ tema <- function(){
       text = element_text(family = "Source Sans Pro", colour = "grey20"),
       axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 12),
       title = element_text(face = "bold"), # size para o Shiny
-      plot.subtitle = element_text(face = "bold", size = 18, color = "red"),
+      plot.subtitle = element_text(face = "plain", size = 20, color = "grey20"),
       plot.caption = element_text(face = "italic"),
       panel.grid.minor = element_blank(),
       legend.text = element_text(size = 12),
@@ -139,7 +139,7 @@ plot1 <- ggplot(dados_plot_cor, aes(x = Mes, y = Valor, fill = -Valor)) +
                                big.mark = ".", 
                                decimal.mark = ","),
                 y = Valor + 10000),
-            size = 4, family = "Source Sans Pro") +
+            size = 4, family = "Source Sans Pro", color = "grey20") +
   scale_fill_gradientn(colours = rev(brewer.pal(8, "YlOrRd")[2:8])) +
   coord_polar(theta = "x", start = 0, direction = 1) +
   scale_y_continuous(limits = c(-50000, NA), labels = function(x) {format(x/1000, big.mark = ".", decimal.mark = ",")}) +
@@ -159,7 +159,8 @@ plot_din <- plot1 +
   labs(subtitle = "{closest_state}") +
   transition_states(Ano, 1, 4, wrap = FALSE)
 
-animate(plot_din + ease_aes('quadratic-in-out'), height = 480, width = 800)
+animation::ani.options(antialias = "cleartype")
+animate(plot_din + ease_aes('quadratic-in-out'), bg = 'transparent', height = 488, width = 688)
 anim_save("divida_quadratic.gif", animation = last_animation())
 # animate(plot_din + ease_aes('sine-in-out'), height = 480, width = 800)
 # anim_save("divida_sine.gif", animation = last_animation())
@@ -212,11 +213,11 @@ resgates_frag <- resgates_frag %>%
 ```
 
 ```{r}
-# dados_plot_frag <- resgates_frag %>% filter(Ano == 2014)
-dados_plot_frag <- resgates_frag
+dados_plot_frag <- resgates_frag %>% filter(Ano == 2014)
+# dados_plot_frag <- resgates_frag
 
 plot_equalizador <- ggplot(dados_plot_frag, aes(x = Mes, y = Valor_faixa, fill = Faixa)) +
-  geom_col(width = 0.4) +
+  geom_col(width = 0.4, color = 'white') +
   geom_text(aes(label = format(round(Valor/1000,0), 
                                big.mark = ".", 
                                decimal.mark = ","),
@@ -225,7 +226,7 @@ plot_equalizador <- ggplot(dados_plot_frag, aes(x = Mes, y = Valor_faixa, fill =
   scale_y_continuous(limits = c(-50000, NA), breaks = (0:7)*intervalo, 
                      labels = function(x) {format(x/1000, big.mark = ".", decimal.mark = ",")}) +
   scale_fill_manual(values = rev(brewer.pal(8, "YlOrRd"))[2:8]) +
-  coord_polar(theta = "x", start = 0, direction = 1) +
+  #coord_polar(theta = "x", start = 0, direction = 1) +
   labs(
     y = "Bilhões de R$",
     x = NULL
@@ -237,9 +238,22 @@ plot_equalizador <- ggplot(dados_plot_frag, aes(x = Mes, y = Valor_faixa, fill =
         axis.title.y = element_text(hjust = 0.85))
 
 plot_equalizador
+
+plot_equalizador + coord_polar(theta = "x", start = 0, direction = 1)
+
 ```
 
 ```{r}
+
+plot_din_frag <- plot_equalizador + 
+  labs(subtitle = "{closest_state}") +
+  transition_states(Ano, 1, 4, wrap = FALSE)
+
+animate(plot_din_frag + ease_aes('quadratic-in-out'), height = 480, width = 800)
+anim_save("divida_quadratic.gif", animation = last_animation())
+
+
+
 plot_dinamico <- plot_equalizador + 
   theme(panel.grid.major.y = element_line(color = "grey90", linetype = "dotted")) +
   labs(subtitle = "{frame_time}") +
@@ -250,45 +264,3 @@ plot_dinamico <- plot_equalizador +
 
 animate(plot_dinamico, nframes = 100, height = 480, width = 800)
 ```
-
-
-
-```{r}
-
-  
-  scale_x_continuous(labels = c("Janeiro", "Fevereiro", "MarÃ§o", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"), breaks = 1:12) +
-  labs(
-    x = NULL,
-    y = NULL
-  ) + 
-  theme_minimal() +
-  theme(
-      text = element_text(family = "Source Sans Pro", colour = "grey20"),
-      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 12),
-      title = element_text(face = "bold"),
-      plot.subtitle = element_text(face = "bold", size = 18, color = "red"),
-      plot.caption = element_text(face = "italic"), 
-      panel.grid.minor = element_line(linetype = "dotted"),
-      legend.text = element_text(size = 12),
-      legend.title = element_text(size = 12),
-      axis.ticks.y = element_line(size = 0.5),
-      axis.ticks.length = unit(.15, "cm"),
-      axis.title = element_text(size = 11))
-
-
-polar_gif <- polar_plot +
-  transition_reveal(Ano, Data) 
-
-animation::ani.options(antialias = "cleartype")
-
-animate(polar_gif, nframes = 100, height = 600, width = 600)
-# animate(polar_gif, nframes = nrow(dados), height = 600, width = 600)
-
-```
-
-Salvar...
-
-```{r}
-anim_save("expenditure_Brazil.gif", animation = last_animation())
-```
-
