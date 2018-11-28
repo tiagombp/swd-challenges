@@ -33,11 +33,11 @@ tema <- function(){
       plot.subtitle = element_text(face = "plain", size = 20, color = "grey20"),
       plot.caption = element_text(face = "italic"),
       panel.grid.minor = element_blank(),
-      legend.text = element_text(size = 12),
-      legend.title = element_text(size = 12),
+      legend.text = element_text(size = 18),
+      legend.title = element_text(size = 18),
       axis.ticks = element_line(size = 0.5),
       axis.ticks.length = unit(.25, "cm"),
-      axis.title = element_text(size = 11),
+      axis.title = element_text(size = 16),
       legend.position = 'bottom')
   }
 
@@ -138,8 +138,8 @@ plot1 <- ggplot(dados_plot_cor, aes(x = Mes, y = Valor, fill = -Valor)) +
   geom_text(aes(label = format(round(Valor/1000,0), 
                                big.mark = ".", 
                                decimal.mark = ","),
-                y = Valor + 10000),
-            size = 4, family = "Source Sans Pro", color = "grey20") +
+                y = Valor + 11000),
+            size = 5, family = "Source Sans Pro", color = "grey20") +
   scale_fill_gradientn(colours = rev(brewer.pal(8, "YlOrRd")[2:8])) +
   coord_polar(theta = "x", start = 0, direction = 1) +
   scale_y_continuous(limits = c(-50000, NA), labels = function(x) {format(x/1000, big.mark = ".", decimal.mark = ",")}) +
@@ -246,8 +246,8 @@ plot_equalizador <- ggplot(dados_plot_frag, aes(x = Mes, y = Valor_faixa, fill =
   geom_text(aes(label = format(round(Valor/1000,0), 
                                big.mark = ".", 
                                decimal.mark = ","),
-                y = Valor + 10000), fontface = "plain",
-            size = 4, family = "Source Sans Pro", color = "grey20") +
+                y = Valor + 11500), fontface = "plain",
+            size = 5, family = "Source Sans Pro", color = "grey20") +
   scale_y_continuous(limits = c(-50000, NA), breaks = (0:7)*intervalo, 
                      labels = function(x) {format(x/1000, big.mark = ".", decimal.mark = ",")}) +
   scale_fill_manual(values = rev(brewer.pal(8, "YlOrRd")[2:8])) +
@@ -262,11 +262,11 @@ plot_equalizador <- ggplot(dados_plot_frag, aes(x = Mes, y = Valor_faixa, fill =
         panel.grid.major.x = element_line(color = "grey90", linetype = "solid"),
         axis.title.y = element_text(hjust = 0.85))
 
-plot_equalizador
+# plot_equalizador
 
 plot_eq_polar <- plot_equalizador + coord_polar(theta = "x", start = 0, direction = 1)
 
-plot_eq_polar
+# plot_eq_polar
 
 ```
 
