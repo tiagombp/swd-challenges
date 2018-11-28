@@ -27,8 +27,8 @@ library(lubridate)
 tema <- function(){
     theme_minimal() +
     theme(
-      text = element_text(family = "Source Sans Pro", colour = "grey20"),
-      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 12),
+      text = element_text(family = "Open Sans", colour = "grey20"),
+      axis.text = element_text(family = "Open Sans", colour = "grey20", size = 12),
       title = element_text(face = "bold"), # size para o Shiny
       plot.subtitle = element_text(face = "plain", size = 20, color = "grey20"),
       plot.caption = element_text(face = "italic"),
@@ -49,8 +49,8 @@ Importação do Ckan.
 
 ```{r pressure, echo=FALSE}
 
-recurso_TT <- resource_show(id="bf69babd-ac07-40ce-90ff-c8e07ec8c8bf",url="https://apickan.tesouro.gov.br/ckan")
-download.file(recurso_TT$url, destfile = "./divida.xlsx", mode = 'wb' )
+# recurso_TT <- resource_show(id="bf69babd-ac07-40ce-90ff-c8e07ec8c8bf",url="https://apickan.tesouro.gov.br/ckan")
+# download.file(recurso_TT$url, destfile = "./divida.xlsx", mode = 'wb' )
 tabela <- read_excel("divida.xlsx", skip = 4)
 ```
 
@@ -246,11 +246,13 @@ plot_equalizador <- ggplot(dados_plot_frag, aes(x = Mes, y = Valor_faixa, fill =
   geom_text(aes(label = format(round(Valor/1000,0), 
                                big.mark = ".", 
                                decimal.mark = ","),
-                y = Valor + 11500), fontface = "plain",
-            size = 5, family = "Source Sans Pro", color = "grey20") +
+                y = Valor + 15000,
+                colour = Valor), 
+            size = 6, family = "Open Sans") +
   scale_y_continuous(limits = c(-50000, NA), breaks = (0:7)*intervalo, 
                      labels = function(x) {format(x/1000, big.mark = ".", decimal.mark = ",")}) +
   scale_fill_manual(values = rev(brewer.pal(8, "YlOrRd")[2:8])) +
+  scale_colour_gradientn(colours = brewer.pal(8, "YlOrRd")[2:8]) +
   #coord_polar(theta = "x", start = 0, direction = 1) +
   labs(
     y = "Bilhões de R$",
@@ -258,7 +260,7 @@ plot_equalizador <- ggplot(dados_plot_frag, aes(x = Mes, y = Valor_faixa, fill =
   ) +
   tema() +
   theme(legend.position = 'none',
-        panel.grid.major.y = element_line(color = "grey80", linetype = "dotted"),
+        panel.grid.major.y = element_line(color = "grey90", linetype = "dotted"),
         panel.grid.major.x = element_line(color = "grey90", linetype = "solid"),
         axis.title.y = element_text(hjust = 0.85))
 
@@ -272,12 +274,12 @@ plot_eq_polar <- plot_equalizador + coord_polar(theta = "x", start = 0, directio
 
 ```{r}
 
-plot_din_frag <- plot_eq_polar + theme(panel.grid.major.x = element_blank()) +
+plot_din_frag <- plot_eq_polar + # + theme(panel.grid.major.x = element_blank())
   labs(subtitle = "{closest_state}") +
   transition_states(Ano, 1, 4, wrap = FALSE)
 
 animate(plot_din_frag + ease_aes('linear'), bg = 'transparent', height = 488, width = 688)
 
-anim_save("divida_equalizador2.gif", animation = last_animation())
+# anim_save("divida_equalizador2.gif", animation = last_animation())
 
 ```

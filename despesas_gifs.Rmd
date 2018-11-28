@@ -25,17 +25,17 @@ tema <- function(){
     theme_minimal() +
     theme(
       text = element_text(family = "Source Sans Pro", colour = "grey20"),
-      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 12),
+      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 16),
       title = element_text(face = "bold"), # size para o Shiny
-      plot.subtitle = element_text(face = "bold", size = 18, color = "red"),
+      plot.subtitle = element_text(face = "plain", size = 20, color = "grey20"),
       plot.caption = element_text(face = "italic"),
       panel.grid.major = element_blank(), 
       panel.grid.minor = element_blank(),
-      legend.text = element_text(size = 12),
-      legend.title = element_text(size = 12),
+      legend.text = element_text(size = 18),
+      legend.title = element_text(size = 18),
       axis.ticks = element_line(size = 0.5),
       axis.ticks.length = unit(.25, "cm"),
-      axis.title = element_text(size = 11),
+      axis.title = element_text(size = 16),
       legend.position = 'bottom')
   }
 
@@ -90,7 +90,9 @@ Category <- c("Personnel and Public Sector Pensions","Healthcare Costs","Educati
 
 Categoria_sem_acento <- c("Pessoal (Ativo, Inativo, Pension.)", "Custeio da Saude", "Custeio da Educacao", "Custeio Social", "Custeio Administrativo", "Beneficios Previdenciarios RGPS", "Investimentos", "Transferencias a Estados e Mun.")
 
-traducao <- data.frame(Categoria = unique(dados$Categoria), Category, Categoria_sem_acento)
+Categoria_reduzida <- c("Pessoal", "Custeio Saúde", "Custeio Educação", "Custeio Social", "Custeio Administrativo", "Beneficios RGPS", "Investimentos", "Transferências")
+
+traducao <- data.frame(Categoria = unique(dados$Categoria), Category, Categoria_sem_acento, Categoria_reduzida)
 
 dados <- dados %>%
   left_join(traducao)
@@ -136,10 +138,10 @@ dados_com_cores <- dados %>%
 Agora no plot vou usar o `scale_fill_identity`!
 
 ```{r}
-dados_plot <- dados_com_cores %>% filter(Ano == "2015")
+# dados_plot <- dados_com_cores %>% filter(Ano == "2015")
 dados_plot <- dados_com_cores
 
-plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria, Valor))) +
+plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria_reduzida, Valor))) +
   geom_bar(aes(fill = CoresNormais), stat = 'identity') +
   geom_tile(aes(y = inicial, color = CoresEscuras), width = 0.9, height = 0.00001, linetype = 'dotted') +
   geom_tile(aes(y = final, color = CoresEscuras), width = 0.9, height = 0.00001) +
@@ -147,17 +149,17 @@ plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria, Valor)
                 label = percent(round(Valor, 4)), 
                 color = CoresEscuras), 
             position = position_dodge(1),
-            size = 5, family = "Source Sans Pro", vjust = 0) +
+            size = 6, family = "Open Sans", vjust = 0) +
   geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", inicial, NA)), 
             x = qde_categorias + 0.8, 
             label = min(dados_plot$Ano),
             vjust = "top", hjust = "center", color = "grey50",
-            family = "Source Sans Pro", size = 3) +
+            family = "Open Sans", size = 4.5) +
   geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", final, NA)), 
             x = qde_categorias + 0.8, 
             label = max(dados_plot$Ano),
             vjust = "top", hjust = "center", color = "grey50", 
-            family = "Source Sans Pro", size = 3) +
+            family = "Open Sans", size = 4.5) +
   coord_flip() +
   scale_y_continuous(labels = percent, expand = c(0, 0), limits = c(0,0.095)) +
   scale_x_discrete(expand = c(0, 1.01)) +
@@ -167,7 +169,7 @@ plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria, Valor)
   #scale_fill_manual(values = paleta) +
   labs(
     x = NULL,
-    y = "Percentual do PIB",
+    y = NULL,
     title = NULL
   ) +
   #geom_text(aes(label = Ano), x = 1, y = 0.05, size = 5) +
