@@ -24,8 +24,8 @@ library(RColorBrewer)
 tema <- function(){
     theme_minimal() +
     theme(
-      text = element_text(family = "Source Sans Pro", colour = "grey20"),
-      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 16),
+      text = element_text(family = "Open Sans", colour = "grey20"),
+      axis.text = element_text(family = "Open Sans", colour = "grey20", size = 16),
       title = element_text(face = "bold"), # size para o Shiny
       plot.subtitle = element_text(face = "plain", size = 20, color = "grey20"),
       plot.caption = element_text(face = "italic"),
@@ -138,28 +138,30 @@ dados_com_cores <- dados %>%
 Agora no plot vou usar o `scale_fill_identity`!
 
 ```{r}
+# removi as linhas e rótulos indicando 2008 / 2017
+
 # dados_plot <- dados_com_cores %>% filter(Ano == "2015")
 dados_plot <- dados_com_cores
 
 plot_estatico <- ggplot(dados_plot, aes(y = Valor, x = reorder(Categoria_reduzida, Valor))) +
   geom_bar(aes(fill = CoresNormais), stat = 'identity') +
-  geom_tile(aes(y = inicial, color = CoresEscuras), width = 0.9, height = 0.00001, linetype = 'dotted') +
-  geom_tile(aes(y = final, color = CoresEscuras), width = 0.9, height = 0.00001) +
+  # geom_tile(aes(y = inicial, color = CoresEscuras), width = 0.9, height = 0.00001, linetype = 'dotted') +
+  # geom_tile(aes(y = final, color = CoresEscuras), width = 0.9, height = 0.00001) +
   geom_text(aes(y = Valor + 0.005, 
                 label = percent(round(Valor, 4)), 
                 color = CoresEscuras), 
             position = position_dodge(1),
-            size = 6, family = "Open Sans", vjust = 0) +
-  geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", inicial, NA)), 
-            x = qde_categorias + 0.8, 
-            label = min(dados_plot$Ano),
-            vjust = "top", hjust = "center", color = "grey50",
-            family = "Open Sans", size = 4.5) +
-  geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", final, NA)), 
-            x = qde_categorias + 0.8, 
-            label = max(dados_plot$Ano),
-            vjust = "top", hjust = "center", color = "grey50", 
-            family = "Open Sans", size = 4.5) +
+            size = 6, family = "Open Sans", vjust = 'center') +
+  # geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", inicial, NA)), 
+  #           x = qde_categorias + 0.8, 
+  #           label = min(dados_plot$Ano),
+  #           vjust = "top", hjust = "center", color = "grey50",
+  #           family = "Open Sans", size = 4.5) +
+  # geom_text(aes(y = ifelse(Categoria == "Benefícios Previdenciários RGPS", final, NA)), 
+  #           x = qde_categorias + 0.8, 
+  #           label = max(dados_plot$Ano),
+  #           vjust = "top", hjust = "center", color = "grey50", 
+  #           family = "Open Sans", size = 4.5) +
   coord_flip() +
   scale_y_continuous(labels = percent, expand = c(0, 0), limits = c(0,0.095)) +
   scale_x_discrete(expand = c(0, 1.01)) +
