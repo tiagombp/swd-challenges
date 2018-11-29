@@ -28,7 +28,7 @@ tema <- function(){
     theme_minimal() +
     theme(
       text = element_text(family = "Open Sans", colour = "grey20"),
-      axis.text = element_text(family = "Open Sans", colour = "grey20", size = 12),
+      axis.text = element_text(family = "Open Sans", colour = "grey20", size = 15),
       title = element_text(face = "bold"), # size para o Shiny
       plot.subtitle = element_text(face = "plain", size = 20, color = "grey20"),
       plot.caption = element_text(face = "italic"),
@@ -37,7 +37,7 @@ tema <- function(){
       legend.title = element_text(size = 18),
       axis.ticks = element_line(size = 0.5),
       axis.ticks.length = unit(.25, "cm"),
-      axis.title = element_text(size = 16),
+      axis.title = element_text(size = 15),
       legend.position = 'bottom')
   }
 
@@ -243,12 +243,12 @@ dados_plot_frag <- resgates_frag
 
 plot_equalizador <- ggplot(dados_plot_frag, aes(x = Mes, y = Valor_faixa, fill = Faixa)) +
   geom_col(width = 0.4, color = 'white') +
-  geom_text(aes(label = format(round(Valor/1000,0), 
-                               big.mark = ".", 
-                               decimal.mark = ","),
-                y = Valor + 15000,
-                colour = Valor), 
-            size = 6, family = "Open Sans") +
+  # geom_text(aes(label = format(round(Valor/1000,0), 
+  #                              big.mark = ".", 
+  #                              decimal.mark = ","),
+  #               y = Valor + 15000,
+  #               colour = Valor), 
+  #           size = 6, family = "Open Sans") +
   scale_y_continuous(limits = c(-50000, NA), breaks = (0:7)*intervalo, 
                      labels = function(x) {format(x/1000, big.mark = ".", decimal.mark = ",")}) +
   scale_fill_manual(values = rev(brewer.pal(8, "YlOrRd")[2:8])) +
